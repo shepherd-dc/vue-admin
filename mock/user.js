@@ -72,12 +72,12 @@ export default [
 
   // user logout
   {
-    url: '/vue-admin-template/user/logout',
+    url: '/user/logout',
     type: 'post',
     response: _ => {
       return {
-        code: 20000,
-        data: 'success'
+        error_code: 0,
+        msg: 'success'
       }
     }
   }
