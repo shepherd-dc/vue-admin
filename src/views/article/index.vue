@@ -7,7 +7,7 @@
       </el-select>
       <el-select v-model="listQuery.column_id" placeholder="子栏目" clearable class="filter-item" style="width: 216px" @change="handleFilter">
         <el-option-group v-for="group in menus" :key="group.id" :label="group.menu_name">
-          <el-option v-for="item in group.submenu" :key="item.id" :label="item.name" :value="item.id+'-'+item.path" />
+          <el-option v-for="item in group.submenu" :key="item.id" :label="item.name_zh" :value="item.id+'-'+item.path" />
         </el-option-group>
       </el-select>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">搜索</el-button>

@@ -26,7 +26,12 @@
       </el-table-column>
       <el-table-column label="栏目名" width="110px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.name }}</span>
+          <span>{{ scope.row.name_zh }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="英文名" width="110px" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.name_en }}</span>
         </template>
       </el-table-column>
       <el-table-column label="主菜单" width="110px" align="center">
@@ -71,8 +76,12 @@
             <el-option v-for="item in menuOptions" :key="item.id" :label="item.menu_name" :value="item.id" />
           </el-select>
         </el-form-item>
-        <el-form-item label="栏目名" prop="name">
-          <el-input v-model="temp.name" @blur="setPath" /></el-form-item>
+        <el-form-item label="栏目名" prop="name_zh">
+          <el-input v-model="temp.name_zh" />
+        </el-form-item>
+        <el-form-item label="英文名" prop="name_en">
+          <el-input v-model="temp.name_en" @blur="setPath" />
+        </el-form-item>
         <el-form-item label="官网" prop="official_doc">
           <el-input v-model="temp.official_doc" />
         </el-form-item>
@@ -151,7 +160,8 @@ export default {
       temp: {
         id: undefined,
         menu_id: '',
-        name: '',
+        name_zh: '',
+        name_en: '',
         description: '',
         official_doc: '',
         pic: '',
@@ -166,7 +176,8 @@ export default {
       },
       rules: {
         menu_id: [{ required: true, message: '请选择主菜单', trigger: 'change' }],
-        name: [{ required: true, message: '请输入栏目名', trigger: 'blur' }],
+        name_zh: [{ required: true, message: '请输入栏目名', trigger: 'blur' }],
+        name_en: [{ required: true, message: '请输入英文名', trigger: 'blur' }],
         description: [{ required: true, message: '请输入简介', trigger: 'blur' }],
         official_doc: [{ required: true, message: '请输入官方文档地址', trigger: 'blur' }],
         pic: [{ required: true, message: '请上传栏目图片', trigger: 'change' }]
@@ -213,7 +224,8 @@ export default {
       this.temp = {
         id: undefined,
         menu_id: '',
-        name: '',
+        name_zh: '',
+        name_en: '',
         description: '',
         official_doc: '',
         pic: '',
@@ -251,7 +263,7 @@ export default {
     async setPath() {
       if (this.temp.menu_id) {
         const { data } = await menuDetail({ id: this.temp.menu_id })
-        this.temp.path = `${data.en_name}/${this.temp.name}`
+        this.temp.path = `${data.en_name}/${this.temp.name_en}`
       }
     },
     handleUpdate(row) {

@@ -29,7 +29,7 @@
                         <el-option
                           v-for="item in group.submenu"
                           :key="item.id"
-                          :label="item.name"
+                          :label="item.name_zh"
                           :value="item.id"
                         />
                       </el-option-group>
