@@ -54,6 +54,8 @@
 
 <script>
 import { validUsername } from '@/utils/validate'
+import { desEncryptPlainObject } from '@/utils/crypto'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'Login',
@@ -86,6 +88,11 @@ export default {
       redirect: undefined
     }
   },
+  computed: {
+    ...mapGetters([
+      'key'
+    ])
+  },
   watch: {
     $route: {
       handler: function(route) {
@@ -109,7 +116,8 @@ export default {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
-          this.$store.dispatch('user/login', this.loginForm).then(() => {
+          const loginForm = desEncryptPlainObject(this.loginForm, atob(this.key))
+          this.$store.dispatch('user/login', loginForm).then(() => {
             this.$router.push({ path: this.redirect || '/' })
             this.loading = false
           }).catch(() => {

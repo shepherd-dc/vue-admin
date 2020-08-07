@@ -104,7 +104,9 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import { fetchUserList, checkUser, checkAccount, addUser, editUser, deleteUser, hardDeleteUser } from '@/api/user'
+import { desEncrypt, desEncryptPlainObject } from '@/utils/crypto'
 import waves from '@/directive/waves' // Waves directive
 import Pagination from '@/components/Pagination' // Secondary package based on el-pagination
 
@@ -129,7 +131,8 @@ export default {
       if (!value) {
         return callback(new Error('昵称不能为空'))
       } else {
-        const data = await checkUser({ nickname: this.temp.nickname })
+        const nickname = desEncrypt(this.temp.nickname, atob(this.key))
+        const data = await checkUser({ nickname })
         if (data.error_code === 0) {
           callback()
         } else if (data.error_code === 101) {
@@ -141,7 +144,8 @@ export default {
       if (!value) {
         return callback(new Error('邮箱不能为空'))
       } else {
-        const data = await checkAccount({ email: this.temp.email })
+        const email = desEncrypt(this.temp.email, atob(this.key))
+        const data = await checkAccount({ email })
         if (data.error_code === 0) {
           callback()
         } else if (data.error_code === 100) {
@@ -175,7 +179,7 @@ export default {
       listLoading: true,
       listQuery: {
         page: 1,
-        limit: 5,
+        limit: 10,
         kw: undefined,
         auth: undefined,
         order: 0
@@ -212,6 +216,11 @@ export default {
         repassword: [{ required: true, validator: validatePass2, trigger: 'blur' }]
       }
     }
+  },
+  computed: {
+    ...mapGetters([
+      'key'
+    ])
   },
   async created() {
     await this.getList()
@@ -268,12 +277,13 @@ export default {
     createData() {
       this.$refs['dataForm'].validate(async(valid) => {
         if (valid) {
-          // console.log(this.temp)
-          const data = await addUser(this.temp)
-          if (data.error_code === 0) {
-            this.temp = data.data
-            this.list.unshift(this.temp)
+          const formData = desEncryptPlainObject(this.temp, atob(this.key))
+          const res = await addUser(formData)
+          if (res.error_code === 0) {
+            // this.temp = res.data
+            // this.list.unshift(this.temp)
             this.dialogFormVisible = false
+            await this.getList()
             this.$notify({
               title: '成功',
               message: '创建成功',
@@ -294,6 +304,9 @@ export default {
     },
     async updateData() {
       const tempData = Object.assign({}, this.temp)
+      delete tempData.nickname
+      delete tempData.email
+      delete tempData.create_time
       const data = await editUser(tempData)
       if (data.error_code === 0) {
         for (const v of this.list) {

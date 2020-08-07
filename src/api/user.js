@@ -1,5 +1,9 @@
 import request from '@/utils/request'
 
+export function fetchKeyCode() {
+  return request.get('token/code/key')
+}
+
 export function fetchUserList(query = '') {
   return request({
     url: `user/list`,

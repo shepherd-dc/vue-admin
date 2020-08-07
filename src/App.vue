@@ -5,7 +5,21 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
 export default {
-  name: 'App'
+  name: 'App',
+  computed: {
+    ...mapGetters([
+      'key'
+    ])
+  },
+  mounted() {
+    if (!this.key) this.saveCodeKey()
+  },
+  methods: {
+    ...mapActions('user', [
+      'saveCodeKey'
+    ])
+  }
 }
 </script>

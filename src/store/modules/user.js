@@ -1,11 +1,14 @@
 import { login, getInfo, logout } from '@/api/login'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { fetchKeyCode } from '@/api/user'
+import { getToken, setToken, removeToken, setLocalStorage, getLocalStorage } from '@/utils/auth'
+import { desDecrypt } from '@/utils/crypto'
 import { resetRouter } from '@/router'
 
 const getDefaultState = () => {
   return {
     token: getToken(),
-    name: '',
+    key: getLocalStorage('sn_code'),
+    name: getLocalStorage('nickname'),
     avatar: '',
     roles: ''
   }
@@ -28,15 +31,27 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
+  },
+  SAVE_KEY: (state, key) => {
+    state.key = key
   }
 }
 
 const actions = {
+  // save code key
+  async saveCodeKey({ commit }) {
+    const res = await fetchKeyCode()
+    if (res.error_code === 0) {
+      const { data } = res
+      commit('SAVE_KEY', data)
+      setLocalStorage('sn_code', data)
+    }
+  },
   // user login
   login({ commit }, userInfo) {
-    const { username, password } = userInfo
+    const { username: account, password: secret } = userInfo
     return new Promise((resolve, reject) => {
-      login({ account: username.trim(), secret: password, type: 100 }).then(response => {
+      login({ account, secret, type: 100 }).then(response => {
         const { data } = response
         commit('SET_TOKEN', data.token)
         setToken(data.token)
@@ -57,14 +72,17 @@ const actions = {
           reject('Verification failed, please Login again.')
         }
 
-        const { scope, nickname } = data
-
+        let { scope, nickname } = data
+        const key = atob(state.key)
+        scope = desDecrypt(scope, key)
+        nickname = desDecrypt(nickname, key)
         if (scope) { // verify permission scope
           commit('SET_ROLES', scope)
         } else {
           reject('getInfo: no permission scope !')
         }
 
+        setLocalStorage('nickname', nickname)
         commit('SET_NAME', nickname)
         // commit('SET_AVATAR', avatar)
 
