@@ -20,7 +20,7 @@ function aesDecrypt(word) {
 }
 
 // DES3加密方法
-function desEncrypt(message, key) {
+function desEncrypt(message, key = '@_a7~Ul1l1!@lx100$#365#$') {
   key = CryptoJS.enc.Utf8.parse(key) // 将key转换成 wordArray
   const encrypted = CryptoJS.TripleDES.encrypt(message, key, {
     // iv: des3iv,
@@ -32,7 +32,7 @@ function desEncrypt(message, key) {
 }
 
 // DES3解密方法
-function desDecrypt(ciphertext, key) {
+function desDecrypt(ciphertext, key = '@_a7~Ul1l1!@lx100$#365#$') {
   key = CryptoJS.enc.Utf8.parse(key)
   if (ciphertext === '' || ciphertext === null || ciphertext === undefined) {
     return ''
@@ -51,14 +51,14 @@ function desDecrypt(ciphertext, key) {
   return decrypted.toString(CryptoJS.enc.Utf8)
 }
 
-function desEncryptPlainObject(obj, key) {
+function desEncryptPlainObject(obj) {
   const data = {}
   Object.keys(obj).forEach((prop) => {
     if (obj[prop]) {
       if (typeof obj[prop] === 'number') {
         data[prop] = obj[prop]
       } else {
-        data[prop] = desEncrypt(obj[prop], key)
+        data[prop] = desEncrypt(obj[prop])
       }
     }
   })

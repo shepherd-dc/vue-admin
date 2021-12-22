@@ -1,16 +1,14 @@
 import { login, getInfo, logout } from '@/api/login'
-import { fetchKeyCode } from '@/api/user'
-import { getToken, setToken, removeToken, setLocalStorage, getLocalStorage } from '@/utils/auth'
+import { getToken, setToken, removeToken, setLocalStorage, getLocalStorage, removeLocalStorage } from '@/utils/auth'
 import { desDecrypt } from '@/utils/crypto'
 import { resetRouter } from '@/router'
 
 const getDefaultState = () => {
   return {
     token: getToken(),
-    key: getLocalStorage('sn_code'),
     name: getLocalStorage('nickname'),
-    avatar: '',
-    roles: ''
+    roles: getLocalStorage('roles'),
+    avatar: ''
   }
 }
 
@@ -18,6 +16,8 @@ const state = getDefaultState()
 
 const mutations = {
   RESET_STATE: (state) => {
+    removeLocalStorage('nickname')
+    removeLocalStorage('roles')
     Object.assign(state, getDefaultState())
   },
   SET_TOKEN: (state, token) => {
@@ -25,28 +25,18 @@ const mutations = {
   },
   SET_NAME: (state, name) => {
     state.name = name
+    setLocalStorage('nickname', name)
   },
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
-  },
-  SAVE_KEY: (state, key) => {
-    state.key = key
+    setLocalStorage('roles', roles)
   }
 }
 
 const actions = {
-  // save code key
-  async saveCodeKey({ commit }) {
-    const res = await fetchKeyCode()
-    if (res.error_code === 0) {
-      const { data } = res
-      commit('SAVE_KEY', data)
-      setLocalStorage('sn_code', data)
-    }
-  },
   // user login
   login({ commit }, userInfo) {
     const { username: account, password: secret } = userInfo
@@ -73,16 +63,14 @@ const actions = {
         }
 
         let { scope, nickname } = data
-        const key = atob(state.key)
-        scope = desDecrypt(scope, key)
-        nickname = desDecrypt(nickname, key)
+        scope = desDecrypt(scope)
+        nickname = desDecrypt(nickname)
         if (scope) { // verify permission scope
           commit('SET_ROLES', scope)
         } else {
           reject('getInfo: no permission scope !')
         }
 
-        setLocalStorage('nickname', nickname)
         commit('SET_NAME', nickname)
         // commit('SET_AVATAR', avatar)
 

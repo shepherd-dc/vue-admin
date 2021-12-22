@@ -104,7 +104,6 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import { fetchUserList, checkUser, checkAccount, addUser, editUser, deleteUser, hardDeleteUser } from '@/api/user'
 import { desEncrypt, desEncryptPlainObject } from '@/utils/crypto'
 import waves from '@/directive/waves' // Waves directive
@@ -131,7 +130,7 @@ export default {
       if (!value) {
         return callback(new Error('昵称不能为空'))
       } else {
-        const nickname = desEncrypt(this.temp.nickname, atob(this.key))
+        const nickname = desEncrypt(this.temp.nickname)
         const data = await checkUser({ nickname })
         if (data.error_code === 0) {
           callback()
@@ -144,7 +143,7 @@ export default {
       if (!value) {
         return callback(new Error('邮箱不能为空'))
       } else {
-        const email = desEncrypt(this.temp.email, atob(this.key))
+        const email = desEncrypt(this.temp.email)
         const data = await checkAccount({ email })
         if (data.error_code === 0) {
           callback()
@@ -217,11 +216,6 @@ export default {
       }
     }
   },
-  computed: {
-    ...mapGetters([
-      'key'
-    ])
-  },
   async created() {
     await this.getList()
   },
@@ -277,7 +271,7 @@ export default {
     createData() {
       this.$refs['dataForm'].validate(async(valid) => {
         if (valid) {
-          const formData = desEncryptPlainObject(this.temp, atob(this.key))
+          const formData = desEncryptPlainObject(this.temp)
           const res = await addUser(formData)
           if (res.error_code === 0) {
             // this.temp = res.data
